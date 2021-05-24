@@ -94,6 +94,15 @@ function main(password) {
     }
 }
 
+// Password should never be specified as a command-line command option.
+// Password may be in a file and the file may be specified on the
+// command-line command.
+// User may be prompted for their password.
+// The reason we never retrieve the password from a command-line command option
+// is that the command gets logged in a variety of places, including in history.
+// If we permit the password to be specified as a command-line command option in
+// clear text, then the password will be logged in a variety of places including
+// history.
 prompt.get(promptPasswordSpec,
            (err, result) => {
                if (err) {
