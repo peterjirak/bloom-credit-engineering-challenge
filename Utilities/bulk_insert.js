@@ -4,9 +4,39 @@ const path = require('path');
 const fs = require('fs');
 const commandLineArgs = require('command-line-args');
 const prompt = require('prompt');
+const { promisify } = require('util');
 const mysql = require('mysql');
 
+const dbCharset = 'utf8mb4';
+
+// The defaultMaxAllowedPacket is the standard max_allowed_packet for our
+// database. While performing the bulk insert operation, we increase
+// the max_allowed_packet.
+//
+// When the database operations are complete we will restore the max_allowed_packet
+// to the defaultMaxAllowedPacket.
+//
+// Default max_allowed_packet on our database is 64 megabytes
+const defaultMaxAllowedPacket    =  67108864; // in bytes
+
+// Prior to our bulk insert operation we set the max_allowed_packet to
+// 500 MB
+const bulkInsertMaxAllowedPacket = 524288000; // in bytes
+
 const scriptName = path.basename(__filename);
+
+// Each row consists of 1800 characters including the newline character
+const fixedRowLength = 1800;
+
+// maxBulkInsertCount is the maximum number of records to insert at a time.
+const maxBulkInsertCount = 145554;
+
+// Add one for the newline character
+const maxFileLengthToRead = maxBulkInsertCount * ( fixedRowLength + 1 );
+
+let dbConnection = null;
+
+let filePosition = 0;
 
 const optionDefinitions = [
     { name: 'input-file', alias: 'i', type: String },
@@ -31,7 +61,15 @@ const promptPasswordSpec = {
     }
 };
 
-function getDbConnection(host, user, database, password, debug) {
+const connectDb = async function(connection) {
+    const promisifyConnectDb = promisify(connection.connect).bind(connection);
+    return await promisifyConnectDb();
+}
+
+async function getDbConnection(host, user, database, password) {
+    if (dbConnection) {
+        return dbConnection;
+    }
     if (!host) {
         throw new Error(
             `${scriptName} invoked without a valid --db-host`);
@@ -47,22 +85,34 @@ function getDbConnection(host, user, database, password, debug) {
             `Password for database user is not specified.`)
     }
 
-    const connection = mysql.createConnection({
+    dbConnection = mysql.createConnection({
         host: host,
         user: user,
         database: database,
-        password: password
+        password: password,
+        charset: dbCharset
     });
 
-    if (!connection) {
+    if (!dbConnection) {
         throw new Error(
             `${scriptName} Failed to connect ${user}@${host}:${database}`);
     }
 
-    return connection;
+    await connectDb(
+              (err) => {
+                if (err) {
+                    console.error(
+                        `${scriptName} Failed to connect ${user}@${host}:${database} : ${err}`);
+                    console.error(err.stack);
+                    throw err;
+                }
+              }
+          );
+
+    return dbConnection;
 }
 
-function main(password) {
+async function main(password) {
     const inputFile = commandLineOptions['input-file'] ?
                       commandLineOptions['input-file'].trim() : null;
 
@@ -81,6 +131,44 @@ function main(password) {
             `${scriptName} invoked with --input-file='${inputFile}' : ` +
             `Specified Input file is a directory.`);
     }
+
+    const connection = await getDbConnection(commandLineOptions['db-host'],
+                                             commandLineOptions['db-user'],
+                                             commandLineOptions['database'],
+                                             password);
+    
+    const readBuffer = Buffer.alloc(maxFileLengthToRead);
+
+    let inputFd = null;
+
+    try {
+        inputFd = openSync(inputFile, 'r');
+    } catch (err) {
+        console.error(
+            `Attempt to open the input file '${inputFile}' failed: ${err}`);
+        throw err;
+    }
+
+    let endOfFileReached = false;
+
+    while (!endOfFileReached) {
+        let bytesRead = fs.readSync(
+                            inputFd,
+                            readBuffer,
+                            0,
+                            maxFileLengthToRead,
+                            filePosition
+                        );
+        
+        if (!bytesRead || bytesRead < maxFileLengthToRead) {
+            endOfFileReached = true;
+
+            if (!bytesRead) {
+                break;
+            }
+        }
+    }
+
 }
 
 // Password should never be specified as a command-line command option.
@@ -99,5 +187,5 @@ prompt.get(promptPasswordSpec,
                        `${scriptName} error occurred while prompting ` +
                        `command-line user for their database password: ${err}`);
                }
-               main(result.password)
+               await main(result.password)
            });
