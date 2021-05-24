@@ -24,7 +24,7 @@ ALTER TABLE credit_tag ADD CONSTRAINT `credit_tag_uniq_name` UNIQUE (`name`);
 
 CREATE TABLE IF NOT EXISTS consumer_credit_metrics(
     consumer_uuid BINARY(16) NOT NULL,
-    credit_tag_id NOT NULL,
+    credit_tag_id SMALLINT UNSIGNED NOT NULL,
     score INTEGER(9) SIGNED NOT NULL,
     CONSTRAINT consumer_credit_metrics_pk PRIMARY KEY(consumer_uuid, credit_tag_id)
 ) ENGINE=InnoDb;
