@@ -1,0 +1,16 @@
+{
+  "name": "bloom-credit-utilities",
+  "version": "1.0.0",
+  "description": "This package includes files that perform utility fucntions for the bloom-credit-consumer-metrics project. This includes a bulk_insert utility that reads in data from an input file and populates the database with the data from that file.",
+  "main": "bulk_insert.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Peter Eldritch",
+  "license": "ISC",
+  "dependencies": {
+    "command-line-args": "^5.1.1",
+    "mysql": "^2.18.1",
+    "prompt": "^1.1.0"
+  }
+}
