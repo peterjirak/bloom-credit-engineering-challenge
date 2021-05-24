@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS consumer(
 ) ENGINE=InnoDb;
 -- DROP TABLE IF EXISTS consumer;
 
-ALTER TABLE consumer ADD INDEX `consumer_idx_ssn` (`ssn`);
+ALTER TABLE consumer ADD CONSTRAINT `consumer_uniq_ssn` UNIQUE(ssn);
 ALTER TABLE consumer ADD INDEX `consumer_idx_name` (`name`);
 
 CREATE TABLE IF NOT EXISTS credit_tag(
