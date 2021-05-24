@@ -31,3 +31,4 @@ CREATE TABLE IF NOT EXISTS consumer_credit_metrics(
 
 ALTER TABLE consumer_credit_metrics ADD CONSTRAINT `consumer_credit_metrics_fk_consmr_uuid` FOREIGN KEY (consumer_uuid) REFERENCES consumer(uuid);
 ALTER TABLE consumer_credit_metrics ADD CONSTRAINT `consumer_credit_metrics_fk_credit_tag_id` FOREIGN KEY (credit_tag_id) REFERENCES credit_tag(id);
+-- DROP TABLE IF EXISTS consumer_credit_metrics;
