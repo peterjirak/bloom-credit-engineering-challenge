@@ -59,17 +59,6 @@ function getDbConnection(host, user, database, password, debug) {
             `${scriptName} Failed to connect ${user}@${host}:${database}`);
     }
 
-    connection.connect(
-        (err) => {
-            if (err) {
-                console.error(
-                    `${scriptName} Failed to connect ${user}@${host}:${database} : ${err}`);
-                console.error(err.stack);
-                throw err;
-            }  
-        }
-    );
-
     return connection;
 }
 
