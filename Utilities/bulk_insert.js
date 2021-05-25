@@ -4,7 +4,6 @@ const path = require('path');
 const fs = require('fs');
 const commandLineArgs = require('command-line-args');
 const prompt = require('prompt');
-const { promisify } = require('util');
 const mysql = require('mysql');
 
 const dbCharset = 'utf8mb4';
@@ -34,8 +33,8 @@ const maxBulkInsertCount = 145554;
 // Add one for the newline character
 const maxFileLengthToRead = maxBulkInsertCount * ( fixedRowLength + 1 );
 
+let password = null;
 let dbConnection = null;
-
 let filePosition = 0;
 
 const optionDefinitions = [
@@ -61,12 +60,9 @@ const promptPasswordSpec = {
     }
 };
 
-const connectDb = async function(connection) {
-    const promisifyConnectDb = promisify(connection.connect).bind(connection);
-    return await promisifyConnectDb();
-}
+const debug = commandLineOptions['debug'] ? true : false;
 
-async function getDbConnection(host, user, database, password) {
+function getDbConnection(host, user, database, password) {
     if (dbConnection) {
         return dbConnection;
     }
@@ -98,21 +94,109 @@ async function getDbConnection(host, user, database, password) {
             `${scriptName} Failed to connect ${user}@${host}:${database}`);
     }
 
-    await connectDb(
-              (err) => {
-                if (err) {
-                    console.error(
-                        `${scriptName} Failed to connect ${user}@${host}:${database} : ${err}`);
-                    console.error(err.stack);
-                    throw err;
-                }
-              }
-          );
-
     return dbConnection;
 }
 
-async function main(password) {
+function getDataObjectFromFixedLengthRecord(record, inputFileName, lineNumber) {
+    const name = record.substr(0, 72).trim();
+    if (!name) {
+        console.warn(
+            `Warning: ${scriptName}: Record on line number ${lineNumber} in ` +
+            `file '${inputFileName}' is missing a valid consumer name.`);
+    }
+    const ssn = parseInt( record.substr(72, 9).trim().replace(/^0{1,8}/, ''), 10 );
+    if (ssn.isNaN()) {
+        throw new Error(
+            `${scriptName}: Record on line number ${lineNumber} in file ` +
+            `'${inputFileName}' is missing a valid social security number.`
+        );
+    }
+    let = creditTagValues = [ null ];
+    for (let creditTagNumber = 1; creditTagNumber <= 200; creditTagNumber++) {
+        let startIndex = ( 72 + 9 ) + ( ( creditTagNumber - 1) * 9 );
+        let value = record.substr( startIndex, 9 ).trim();
+        if (value.substr( 0, 1) === '-') {
+            value = value.replace(/^-0{1,7}/, '');
+            if (value === '-0') {
+                value = '0';
+            }
+        } else {
+            value = value.replace(/^0{1,8}/, '');
+        }
+        value = parseInt( value, 10 );
+        
+    }
+}
+
+function extractRecordsToInsert(buffer, dataLength, inputFileName, startingLineCount) {
+    let startBufferIndex = 0;
+    let lineCount = startingLineCount - 1;
+
+    while(startBufferIndex < dataLength) {
+        lineCount += 1;
+        let endBufferIndex = startBufferIndex + fixedRowLength + 1;
+        let consumerRecord = buffer.toString('utf8', startBufferIndex, endBufferIndex);
+    }
+}
+
+const getBulkInsertFunction = (options) => {
+    const {
+        connection,
+        user,
+        host,
+        database,
+        inputFile
+    } = options;
+
+    const bulkIsertFunction = (err) => {
+        if (err) {
+            console.error(`${scriptName}: Failed to connect ${user}@${host}:${database}: ${err}`);
+            console.error(err.stack);
+            throw err;
+        }
+
+        if (debug) {
+            console.log(`${scriptName}: Connected ${user}@${host}:${database} as ID ${connection.threadId}`);
+        }
+
+        const readBuffer = Buffer.alloc(maxFileLengthToRead);
+
+        let inputFd = null;
+    
+        try {
+            inputFd = openSync(inputFile, 'r');
+        } catch (err) {
+            console.error(
+                `Attempt to open the input file '${inputFile}' failed: ${err}`);
+            throw err;
+        }
+    
+        let endOfFileReached = false;
+    
+        while (!endOfFileReached) {
+            let bytesRead = fs.readSync(
+                                inputFd,
+                                readBuffer,
+                                0,
+                                maxFileLengthToRead,
+                                filePosition
+                            );
+            
+            if (!bytesRead || bytesRead < maxFileLengthToRead) {
+                endOfFileReached = true;
+    
+                if (!bytesRead) {
+                    break;
+                }
+            }
+        }
+    
+
+    }
+    return bulkInsertFunction;
+}
+
+function main() {
     const inputFile = commandLineOptions['input-file'] ?
                       commandLineOptions['input-file'].trim() : null;
 
@@ -132,10 +216,10 @@ async function main(password) {
             `Specified Input file is a directory.`);
     }
 
-    const connection = await getDbConnection(commandLineOptions['db-host'],
-                                             commandLineOptions['db-user'],
-                                             commandLineOptions['database'],
-                                             password);
+    const connection = getDbConnection(commandLineOptions['db-host'],
+                                       commandLineOptions['db-user'],
+                                       commandLineOptions['database'],
+                                       password);
     
     const readBuffer = Buffer.alloc(maxFileLengthToRead);
 
@@ -187,5 +271,6 @@ prompt.get(promptPasswordSpec,
                        `${scriptName} error occurred while prompting ` +
                        `command-line user for their database password: ${err}`);
                }
-               await main(result.password)
+               password = result.password;
+               main();
            });
