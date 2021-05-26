@@ -41,3 +41,13 @@ do so execute the following command in your psql environment:
 `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
 
 See [The Basics Of PostgreSQL UUID Data Type](https://www.postgresqltutorial.com/postgresql-uuid/)
+
+## We should use a virtual environment in our Python project
+Our Python project will undoubtedly use a variety of Python packages and
+virtual environments are a good way of handling those.
+
+We can setup a new virtual environment using Python3:
+
+`python3 -m venv /path/to/new/virtual/environment`
+
+See [venv — Creation of virtual environments])(https://docs.python.org/3/library/venv.html)
