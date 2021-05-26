@@ -50,7 +50,24 @@ We can setup a new virtual environment using Python3:
 
 `python3 -m venv /path/to/new/virtual/environment`
 
-See [venv — Creation of virtual environments])(https://docs.python.org/3/library/venv.html)
+See:
+* [venv — Creation of virtual environments](https://docs.python.org/3/library/venv.html)
 
+I created venv virtual environment in the Utilities sub-directory of my project:
+1. `cd Utilities`
+2. Create a virtual environment: python3 -m venv ./venv
+3. Activate that virtual environment: source venv/bin/activate
+
+After activating the virtual environment one may now pip install any Python
+modules one needs. Do so in the same terminal window and sub-directory
+that one just activated the virtual environment in.
+
+Example:
+
+`python3 -m pip install PyGreSQL`
 ## Modules and features used in bulk_insert.py
 * [argparse — Parser for command-line options, arguments and sub-commands](https://docs.python.org/3/library/argparse.html)
+* [Web Server Talk: Check if File Exists in Python](https://www.webservertalk.com/check-if-file-exists-in-python)
+* [Python: Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html)
+* [Python: Built-in Exceptions](https://docs.python.org/3/library/exceptions.html)
+* [PyGreSQL: PyGreSQL is an open-source Python module that interfaces to a PostgreSQL database. It embeds the PostgreSQL query library to allow easy use of the powerful PostgreSQL features from a Python script.](https://pypi.org/project/PyGreSQL/)

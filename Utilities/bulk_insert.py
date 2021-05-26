@@ -1,8 +1,9 @@
 import sys
 import os
-import os.path;
+import os.path
 import re
 import argparse
+import pgdb
 
 SCRIPT_NAME = re.sub(r'^.*\/', '', os.path.abspath(sys.argv[0]));
 
@@ -23,42 +24,38 @@ We read in blocks of data from the input file and then perform bulk inserts.
 
 # Add argument: --input-file
 arg_parser.add_argument(
-    ['--input-file', '-i'],
+    '--input-file',
     metavar='INPUT-FILE',
-    dest='input_file',
     type=str,
     required=True,
-    help='Required: specifies the input file to load the data from for ' +
+    help='Required: specifies the input file to load the data from for ' \
          'executing the bulk insert operation.'
 )
 
 # Add argument: --db-host
 arg_parser.add_argument(
-    ['--db-host', '-h'],
+    '--db-host',
     metavar='HOST',
-    dest='host',
     type=str,
     default='localhost',
-    help='Specifies the host that is hosting our database. If not specified,
+    help='Specifies the host that is hosting our database. If not specified,' \
          'then localhost is used.'
 )
 
 # Add argument: --db-port
 arg_parser.add_argument(
-    ['--db-port', '-h'],
+    '--db-port',
     metavar='PORT',
-    dest='port',
     type=str,
-    help='Specifies the port that is used for connecting to our database. ' +
-         'If not specified, then the PostGreSQL default port is used for ' +
+    help='Specifies the port that is used for connecting to our database. ' \
+         'If not specified, then the PostGreSQL default port is used for ' \
          'the connection.'
 )
 
 # Add argument: --db-user
 arg_parser.add_argument(
-    ['--db-user', '-u'],
+    '--db-user',
     metavar='USER',
-    dest='user',
     type=str,
     required=True,
     help='Required: Specifies the user for our database.'
@@ -66,9 +63,8 @@ arg_parser.add_argument(
 
 # Add argument: --database
 arg_parser.add_argument(
-    ['--database', 'd'],
+    '--database',
     metavar='DATABASE',
-    dest='database',
     type=str,
     required=True,
     help='Required: Specifies the name of our database.'
@@ -76,18 +72,10 @@ arg_parser.add_argument(
 
 # Add argument: --debug
 arg_parser.add_argument(
-    ['--debug', 'g'],
-    dest='debug',
-    help=f"When --debug is used {SCRIPT_NAME} will output debug information " +
-           "to STDERR. When --debug is not used, then debug information will " +
+    '--debug',
+    help=f"When --debug is used {SCRIPT_NAME} will output debug information " \
+           "to STDERR. When --debug is not used, then debug information will " \
            "be suppressed."
-)
-
-# Add argument: --help
-arg_parser.add_argument(
-    ['--help', 'h'],
-    dest='help',
-    help=f"When --helpis used {SCRIPT_NAME} will output the usage informtation."
 )
 
 PROG_ARGS_NAMESPACE = arg_parser.parse_args()
@@ -121,14 +109,14 @@ def main():
     if not input_file:
         raise Exception(f"{SCRIPT_NAME} invoked without a valid --input-file.")
     elif not os.path.exists(input_file):
-        raise Exception(f"{SCRIPT_NAME} invoked with " +
-                        f"--input-file='{input_file}'. However, {input_file} " +
-                        "does not exist or cannot be read from. Cannot continue"))
+        raise Exception(f"{SCRIPT_NAME} invoked with " \
+                        f"--input-file='{input_file}'. However, {input_file} " \
+                        "does not exist or cannot be read from. Cannot continue")
     elif os.path.isdir(input_file):
         raise Exception(f"{SCRIPT_NAME} invoked with " +
-                        f"--input-file='{input_file}'. However, {input_file} " +
-                        "exists but is a directory and not a file. " +
-                        "Cannot continue"))
+                        f"--input-file='{input_file}'. However, {input_file} " \
+                        "exists but is a directory and not a file. " \
+                        "Cannot continue")
 
 
 main()
