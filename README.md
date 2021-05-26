@@ -20,3 +20,6 @@ Using a programming language, database, and web framework of your choice, please
 2. Parse the `test.dat` file based on the above description and bulk insert the data into the database. Use generated UUIDs as consumer identifiers.
 3. Create a REST API endpoint for retrieving the full set of credit tags for a given consumer by consumer id provided as a query-string parameter. The endpoint should return data in JSON format.
 4. If time permits, create a second REST API endpoint for retrieving consumer statistics for a given credit tag. The endpoint should retrieve the mean, median, and standard deviation for a credit tag provided as a query-string parameter. The statistics should only include regular (non-negative) values of each credit tag. The endpoint should return data in JSON format.
+
+# Notes on resources
+To test this project while I worked on it, I needed a PostGreSQL database. An issue was that I had an old stale version of PostGreSQL on my laptop, but I did not have a newer version of PostGreSQL, nor did I have all of the passwords, etc. that I would need. Instead of tryi9ng to address that issue, I decided to use PostGreSQL in a Docker container. I downloaded [bitnami/postgresql](https://hub.docker.com/r/bitnami/postgresql) from [Docker Hub](https://hub.docker.com/).
