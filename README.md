@@ -29,7 +29,7 @@ To test this project while I worked on it, I needed a PostGreSQL database. An is
 There are a series of commands used to start and stop a services for a Docker
 Library. Here is a link to the Docker run reference on Docker Docs:
 
-* [Docker command-line teference](https://docs.docker.com/engine/reference/run/)
+* [Docker command-line reference](https://docs.docker.com/engine/reference/run/)
 
 ## Using uuid_generate_v1() and uuid_generate_v4() to generate UUID in PostGreSQL
 We can use `SELECT uuid_generate_v1();` or `SELECT uuid_generate_v4();` to
