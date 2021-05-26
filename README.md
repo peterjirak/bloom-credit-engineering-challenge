@@ -22,4 +22,22 @@ Using a programming language, database, and web framework of your choice, please
 4. If time permits, create a second REST API endpoint for retrieving consumer statistics for a given credit tag. The endpoint should retrieve the mean, median, and standard deviation for a credit tag provided as a query-string parameter. The statistics should only include regular (non-negative) values of each credit tag. The endpoint should return data in JSON format.
 
 # Notes on resources
+## Using PostGreSQL in a Docker Container
 To test this project while I worked on it, I needed a PostGreSQL database. An issue was that I had an old stale version of PostGreSQL on my laptop, but I did not have a newer version of PostGreSQL, nor did I have all of the passwords, etc. that I would need. Instead of tryi9ng to address that issue, I decided to use PostGreSQL in a Docker container. I downloaded [bitnami/postgresql](https://hub.docker.com/r/bitnami/postgresql) from [Docker Hub](https://hub.docker.com/).
+
+### Notes on Docker and Docker Hub
+There are a series of commands used to start and stop a services for a Docker
+Library. Here is a link to the Docker run reference on Docker Docs:
+
+* [Docker command-line teference](https://docs.docker.com/engine/reference/run/)
+
+## Using uuid_generate_v1() and uuid_generate_v4() to generate UUID in PostGreSQL
+We can use `SELECT uuid_generate_v1();` or `SELECT uuid_generate_v4();` to
+generate UUIDs in our application via PostGreSQL.
+
+However, you may need to create the extension that provides uuid-ossp to
+do so execute the following command in your psql environment:
+
+`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
+
+See [The Basics Of PostgreSQL UUID Data Type](https://www.postgresqltutorial.com/postgresql-uuid/)
