@@ -51,3 +51,6 @@ We can setup a new virtual environment using Python3:
 `python3 -m venv /path/to/new/virtual/environment`
 
 See [venv — Creation of virtual environments])(https://docs.python.org/3/library/venv.html)
+
+## Modules and features used in bulk_insert.py
+* [argparse — Parser for command-line options, arguments and sub-commands](https://docs.python.org/3/library/argparse.html)
